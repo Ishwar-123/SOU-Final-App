@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .glass {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-xl;
+  }
+  
+  .glass-dark {
+    @apply bg-gray-900/40 backdrop-blur-md border border-white/10 shadow-2xl;
+  }
+  
+  .btn-primary {
+    @apply px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300;
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-3 bg-white text-gray-800 font-semibold rounded-lg shadow-md hover:shadow-lg border border-gray-200 hover:scale-105 transition-all duration-300;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100;
+  }
+  
+  .card-glass {
+    @apply bg-white/80 backdrop-blur-sm rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-white/40;
+  }
+}
+
+body {
+  @apply bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 min-h-screen;
+}
+.op{
+  background-color: #e5e7eb;
+}

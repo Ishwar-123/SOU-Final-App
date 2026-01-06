@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    .package-card {
+      border: 4px solid #e5e7eb;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .package-card:hover {
+      border-color: #a78bfa;
+      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+      transform: translateY(-5px);
+    }
+    .package-card.selected {
+      border: 4px solid #10b981 !important;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3), 0 10px 40px rgba(16, 185, 129, 0.5) !important;
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%) !important;
+      animation: pulse-border 2s ease-in-out infinite;
+    }
+    @keyframes pulse-border {
+      0%, 100% {
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3), 0 10px 40px rgba(16, 185, 129, 0.5);
+      }
+      50% {
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.4), 0 15px 50px rgba(16, 185, 129, 0.6);
+      }
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      animation: fadeIn 0.3s ease;
+    }
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content { animation: slideUp 0.4s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(50px) scale(0.9); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <main class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 pt-24 sm:pt-28 pb-6 sm:pb-10">
+    <div class="text-center mb-4 sm:mb-6 text-white">
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-black mb-1 sm:mb-2 drop-shadow-lg">
+        📦 Select Your Package
+      </h1>
+      <p class="text-sm sm:text-lg opacity-90">
+        Choose your heritage tour package - One time selection only
+      </p>
+    </div>
+
+    <% if (hasSelectedPackage) { %>
+      <div class="max-w-4xl mx-auto mb-4 sm:mb-6">
+        <div class="bg-gradient-to-r from-red-500 to-pink-600 text-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl border-4 border-red-300">
+          <div class="flex items-start gap-3 sm:gap-4">
+            <div class="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-2xl flex items-center justify-center flex-shrink-0">
+              <span class="text-2xl sm:text-3xl">🔒</span>
+            </div>
+            <div>
+              <h3 class="text-lg sm:text-2xl font-black mb-1 sm:mb-2">Package Already Selected!</h3>
+              <p class="text-sm sm:text-base font-semibold">
+                You have already selected a package. This selection is <strong>permanent</strong> and cannot be changed.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <% if (success) { %>
+      <div class="max-w-4xl mx-auto mb-4 bg-green-500 text-white p-3 sm:p-4 rounded-xl shadow-lg">
+        <p class="font-bold text-center text-sm sm:text-base"><%= success %></p>
+      </div>
+    <% } %>
+
+    <% if (error) { %>
+      <div class="max-w-4xl mx-auto mb-4 bg-red-500 text-white p-3 sm:p-4 rounded-xl shadow-lg">
+        <p class="font-bold text-center text-sm sm:text-base"><%= error %></p>
+      </div>
+    <% } %>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
+      <% if (packages.length === 0) { %>
+        <div class="col-span-full bg-white rounded-2xl shadow-2xl p-8 sm:p-12 text-center">
+          <p class="text-xl sm:text-2xl text-gray-500 mb-3 sm:mb-4">📦 No packages available</p>
+          <p class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
+            No packages are available for your college right now. Please contact admin.
+          </p>
+          <a href="/user/dashboard" class="inline-block bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 sm:px-8 py-3 rounded-xl font-bold hover:shadow-lg active:scale-95 transition text-sm sm:text-base">
+            Go to Dashboard
+          </a>
+        </div>
+      <% } else { %>
+        <% packages.forEach(pkg => { %>
+          <div class="package-card <%= selectedPackageId === (pkg._id && pkg._id.toString()) ? 'selected' : '' %> bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-4 sm:p-6 text-white relative">
+              <div class="flex justify-between items-start gap-3">
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-xl sm:text-2xl font-black mb-1 sm:mb-2 truncate"><%= pkg.name %></h3>
+                  <% if (pkg.college && pkg.college.name) { %>
+                    <p class="text-xs sm:text-sm text-indigo-100 truncate">🎓 <%= pkg.college.name %></p>
+                  <% } %>
+                </div>
+                <% if (selectedPackageId === (pkg._id && pkg._id.toString())) { %>
+                  <span class="bg-green-500 text-white px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold flex-shrink-0 shadow-lg">
+                    ✓ SELECTED
+                  </span>
+                <% } %>
+              </div>
+            </div>
+
+            <div class="p-4 sm:p-6">
+              <% if (pkg.startDate) { %>
+                <div class="bg-gradient-to-br from-orange-50 to-red-50 p-3 sm:p-4 rounded-xl border-2 border-orange-200 mb-4 shadow-sm">
+                  <div class="flex items-center gap-2 text-orange-700 mb-2">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span class="text-xs font-bold uppercase tracking-wider">Tour Start Date</span>
+                  </div>
+                  <p class="text-lg sm:text-xl font-black text-orange-800">
+                    <%= new Date(pkg.startDate).toLocaleDateString('en-IN', {
+                      weekday: 'short',
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                    }) %>
+                  </p>
+                  <p class="text-xs text-gray-600 mt-2">Duration: <%= pkg.duration %> days</p>
+                </div>
+              <% } else { %>
+                <div class="bg-yellow-50 p-3 sm:p-4 rounded-xl border-2 border-yellow-200 mb-4">
+                  <p class="text-xs sm:text-sm text-yellow-700 font-semibold text-center">
+                    ⚠️ Tour start date not set
+                  </p>
+                </div>
+              <% } %>
+
+              <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-4">
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-3 sm:p-4 rounded-xl border-2 border-blue-200 text-center">
+                  <p class="text-[10px] sm:text-xs text-blue-600 font-bold mb-1">⏱️ Duration</p>
+                  <p class="text-xl sm:text-2xl font-black text-blue-800"><%= pkg.duration %></p>
+                  <p class="text-[10px] sm:text-xs text-blue-600">Days</p>
+                </div>
+                <div class="bg-gradient-to-br from-green-50 to-green-100 p-3 sm:p-4 rounded-xl border-2 border-green-200 text-center">
+                  <p class="text-[10px] sm:text-xs text-green-600 font-bold mb-1">💰 Price</p>
+                  <p class="text-xl sm:text-2xl font-black text-green-800">
+                    ₹<%= pkg.price.toLocaleString('en-IN') %>
+                  </p>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <h4 class="text-xs sm:text-sm font-black text-gray-800 mb-2">📝 Description</h4>
+                <p class="text-xs sm:text-sm text-gray-600 leading-relaxed"><%= pkg.description %></p>
+              </div>
+
+              <div class="mb-4">
+                <h4 class="text-xs sm:text-sm font-black text-gray-800 mb-2">
+                  🏛️ Heritage Sites (<%= pkg.places.length %>)
+                </h4>
+                <div class="space-y-2 max-h-60 overflow-y-auto">
+                  <% pkg.places.forEach((place, index) => { %>
+                    <div class="flex justify-between items-center bg-gradient-to-r from-purple-50 to-pink-50 p-2 sm:p-3 rounded-lg border-2 border-purple-100">
+                      <div class="flex items-start gap-2 flex-1 min-w-0">
+                        <span class="bg-purple-600 text-white w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center font-bold text-[10px] sm:text-xs flex-shrink-0">
+                          <%= index + 1 %>
+                        </span>
+                        <div class="flex-1 min-w-0">
+                          <p class="font-bold text-purple-800 text-xs sm:text-sm truncate"><%= place.name %></p>
+                          <p class="text-[10px] sm:text-xs text-purple-600 truncate">📍 <%= place.location %></p>
+                        </div>
+                      </div>
+                      <span class="bg-green-500 text-white px-2 py-1 rounded-full text-[10px] sm:text-xs font-bold flex-shrink-0 ml-2">
+                        ₹<%= place.price.toLocaleString('en-IN') %>
+                      </span>
+                    </div>
+                  <% }); %>
+                </div>
+              </div>
+
+              <% if (selectedPackageId === (pkg._id && pkg._id.toString())) { %>
+                <div class="bg-green-100 border-2 border-green-500 p-3 sm:p-4 rounded-xl text-center">
+                  <p class="text-green-700 font-bold text-sm sm:text-base">
+                    ✅ You have selected this package
+                  </p>
+                </div>
+              <% } else if (hasSelectedPackage) { %>
+                <button disabled class="w-full bg-gray-400 text-white font-bold py-3 rounded-xl cursor-not-allowed text-sm sm:text-base">
+                  ⛔ Cannot Select (Already Selected One)
+                </button>
+              <% } else { %>
+                <button
+                  type="button"
+                  onclick="openModal(
+                    '<%= pkg._id %>',
+                    '<%= pkg.name %>',
+                    <%= pkg.price %>,
+                    <%= pkg.duration %>,
+                    <%= pkg.places.length %>,
+                    '<%= pkg.startDate ? new Date(pkg.startDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "" %>'
+                  )"
+                  class="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-bold py-3 rounded-xl hover:shadow-2xl active:scale-95 transition-all text-sm sm:text-base mb-3"
+                >
+                  🎯 Select This Package
+                </button>
+                <div class="bg-yellow-50 border-2 border-yellow-300 p-3 rounded-xl">
+                  <p class="text-yellow-700 text-[10px] sm:text-xs font-semibold text-center">
+                    ⚠️ Once selected, you cannot change or cancel
+                  </p>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        <% }); %>
+      <% } %>
+    </div>
+
+    <div class="text-center">
+      <a href="/user/dashboard"
+        class="inline-block bg-white text-purple-600 font-bold py-3 px-6 sm:px-8 rounded-2xl shadow-xl hover:shadow-2xl active:scale-95 transition-all text-sm sm:text-base">
+        ← Back to Dashboard
+      </a>
+    </div>
+  </main>
+
+  <div id="confirmModal" class="modal">
+    <div class="modal-content w-11/12 max-w-md mx-auto">
+      <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-6 text-white text-center">
+          <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <span class="text-4xl">📦</span>
+          </div>
+          <h3 class="text-2xl font-black">Confirm Package Selection</h3>
+          <p class="text-sm mt-1 opacity-90">⚠️ ONE-TIME PERMANENT CHOICE</p>
+        </div>
+
+        <div class="p-6">
+          <div class="bg-purple-50 border-2 border-purple-300 rounded-xl p-4 mb-4">
+            <p class="text-center font-bold text-gray-800 mb-3">
+              Package: <span id="modalPackageName" class="text-purple-600"></span>
+            </p>
+            <div id="modalStartDateContainer" class="bg-orange-50 border-2 border-orange-200 rounded-lg p-3 mb-3">
+              <p class="text-xs text-orange-600 font-bold mb-1 text-center">📅 Tour Start Date</p>
+              <p id="modalStartDate" class="text-sm font-black text-orange-700 text-center">-</p>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center">
+              <div>
+                <p class="text-xs text-gray-600">Duration</p>
+                <p id="modalDuration" class="text-lg font-black text-purple-600">-</p>
+                <p class="text-xs text-gray-600">Days</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-600">Places</p>
+                <p id="modalPlaces" class="text-lg font-black text-purple-600">-</p>
+                <p class="text-xs text-gray-600">Sites</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-600">Price</p>
+                <p id="modalPrice" class="text-lg font-black text-green-600">₹0</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-red-50 border-2 border-red-400 rounded-xl p-4 mb-6">
+            <p class="text-sm text-center text-red-700 font-black">
+              🚨 This selection is <strong>PERMANENT</strong> and cannot be changed or cancelled!
+            </p>
+          </div>
+
+          <form id="packageForm" action="/user/select-package" method="POST">
+            <input type="hidden" name="packageId" id="selectedPackageId">
+            <div class="flex flex-col gap-3">
+              <button type="submit"
+                class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-3 px-6 rounded-xl hover:shadow-xl active:scale-95 transition">
+                ✓ Yes, Confirm Selection
+              </button>
+              <button type="button" onclick="closeModal()"
+                class="bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-xl hover:bg-gray-400 active:scale-95 transition">
+                ← Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+<%- include('../partials/footer') %>
+  <script>
+    function openModal(packageId, packageName, price, duration, places, startDate) {
+      document.getElementById('selectedPackageId').value = packageId;
+      document.getElementById('modalPackageName').textContent = packageName;
+      document.getElementById('modalPrice').textContent =
+        '₹' + price.toLocaleString('en-IN');
+      document.getElementById('modalDuration').textContent = duration;
+      document.getElementById('modalPlaces').textContent = places;
+
+      if (startDate && startDate.trim() !== '') {
+        document.getElementById('modalStartDate').textContent = startDate;
+        document.getElementById('modalStartDateContainer').style.display =
+          'block';
+      } else {
+        document.getElementById('modalStartDateContainer').style.display =
+          'none';
+      }
+
+      document.getElementById('confirmModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('confirmModal').classList.remove('active');
+    }
+
+    document
+      .getElementById('confirmModal')
+      .addEventListener('click', function (e) {
+        if (e.target === this) closeModal();
+      });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+</body>
+</html>

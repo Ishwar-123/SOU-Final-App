@@ -1,0 +1,41 @@
+{
+  "name": "hti-app",
+  "version": "1.0.0",
+  "description": "Heritage Tourism Initiative Management System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build:css": "npx tailwindcss -i ./public/css/input.css -o ./public/css/tailwind.css --watch",
+    "seed": "node seed.js"
+  },
+  "keywords": [
+    "heritage",
+    "tourism",
+    "mongodb",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "csv-writer": "^1.6.0",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-pdf": "^1.2.2",
+    "express-session": "^1.18.0",
+    "html-pdf-node": "^1.0.8",
+    "html2pdf.js": "^0.12.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.7.0",
+    "pdfkit": "^0.17.2",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7",
+    "tailwindcss": "^3.4.19"
+  }
+}

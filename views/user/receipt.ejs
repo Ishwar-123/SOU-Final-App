@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+
+    .receipt-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+
+    /* Header */
+    .receipt-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .logo {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 20px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: bold;
+      color: #667eea;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .company-name {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .receipt-title {
+      font-size: 18px;
+      opacity: 0.9;
+      letter-spacing: 2px;
+    }
+
+    /* Content */
+    .receipt-content {
+      padding: 40px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .section:last-child {
+      border-bottom: none;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #666;
+    }
+
+    .info-value {
+      color: #333;
+      font-weight: 500;
+    }
+
+    /* Package Details */
+    .package-box {
+      background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+      border-left: 4px solid #667eea;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+
+    .package-name {
+      font-size: 20px;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+
+    .places-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .place-badge {
+      background: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #667eea;
+      border: 1px solid #667eea;
+    }
+
+    /* Bus Details */
+    .bus-box {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      border-left: 4px solid #2196f3;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+
+    .bus-name {
+      font-size: 18px;
+      font-weight: bold;
+      color: #1976d2;
+      margin-bottom: 5px;
+    }
+
+    .bus-number {
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .seat-badge {
+      display: inline-block;
+      background: #2196f3;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 25px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    /* Total Section */
+    .total-section {
+      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+      padding: 25px;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 16px;
+    }
+
+    .grand-total {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px 0;
+      margin-top: 10px;
+      border-top: 2px solid #4caf50;
+      font-size: 24px;
+      font-weight: bold;
+      color: #2e7d32;
+    }
+
+    /* Footer */
+    .receipt-footer {
+      background: #f5f5f5;
+      padding: 30px;
+      text-align: center;
+      color: #666;
+    }
+
+    .receipt-date {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .thank-you {
+      font-size: 18px;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 20px;
+    }
+
+    /* Buttons */
+    .button {
+      display: inline-block;
+      padding: 15px 40px;
+      border: none;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s;
+      margin: 10px;
+    }
+
+    .download-button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .download-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    .back-button {
+      background: linear-gradient(135deg, #43a047 0%, #66bb6a 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(67, 160, 71, 0.4);
+    }
+
+    .back-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(67, 160, 71, 0.6);
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .receipt-container {
+        box-shadow: none;
+        max-width: 100%;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .receipt-content {
+        page-break-inside: avoid;
+      }
+    }
+
+    @page {
+      margin: 0.5cm;
+    }
+  </style>
+</head>
+<body>
+  <div class="receipt-container">
+    
+    <!-- Header with Logo -->
+    <div class="receipt-header">
+      <div class="logo">HTI</div>
+      <div class="company-name">Heritage Tour India</div>
+      <div class="receipt-title">BOOKING RECEIPT</div>
+    </div>
+
+    <!-- Content -->
+    <div class="receipt-content">
+      
+      <!-- Student Details -->
+      <div class="section">
+        <div class="section-title">
+          <span>👤</span> Student Details
+        </div>
+        <div class="info-row">
+          <span class="info-label">Full Name:</span>
+          <span class="info-value"><%= user.fullName %></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Email:</span>
+          <span class="info-value"><%= user.email %></span>
+        </div>
+        <% if (user.spuId) { %>
+          <div class="info-row">
+            <span class="info-label">SPU ID:</span>
+            <span class="info-value"><%= user.spuId %></span>
+          </div>
+        <% } %>
+        <% if (user.phoneNumber) { %>
+          <div class="info-row">
+            <span class="info-label">Phone:</span>
+            <span class="info-value"><%= user.phoneNumber %></span>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- College & Ambassador Details -->
+      <div class="section">
+        <div class="section-title">
+          <span>🎓</span> College & Ambassador Details
+        </div>
+        <div class="info-row">
+          <span class="info-label">College Name:</span>
+          <span class="info-value"><%= user.college ? user.college.name : 'N/A' %></span>
+        </div>
+        <% if (user.department) { %>
+          <div class="info-row">
+            <span class="info-label">Department:</span>
+            <span class="info-value"><%= user.department %></span>
+          </div>
+        <% } %>
+        <% if (user.college && user.college.souAmbassadorName) { %>
+          <div class="info-row">
+            <span class="info-label">SOU Ambassador:</span>
+            <span class="info-value"><%= user.college.souAmbassadorName %></span>
+          </div>
+        <% } %>
+        <% if (user.college && user.college.souAmbassadorContact) { %>
+          <div class="info-row">
+            <span class="info-label">Ambassador Contact:</span>
+            <span class="info-value"><%= user.college.souAmbassadorContact %></span>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Main Package -->
+      <div class="section">
+        <div class="section-title">
+          <span>📦</span> Main Package
+        </div>
+        
+        <% if (user.selectedPackage) { %>
+          <div class="package-box">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+              <div>
+                <div class="package-name"><%= user.selectedPackage.name %></div>
+                <div style="color: #666; font-size: 14px; margin-bottom: 15px;">
+                  <%= user.selectedPackage.duration %> Days Tour Package
+                </div>
+              </div>
+              <div style="font-size: 24px; font-weight: bold; color: #667eea;">
+                ₹<%= packagePrice.toLocaleString('en-IN') %>
+              </div>
+            </div>
+            
+            <% if (user.selectedPackage.places && user.selectedPackage.places.length > 0) { %>
+              <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #667eea33;">
+                <div style="font-weight: 600; color: #667eea; margin-bottom: 10px;">📍 Included Places:</div>
+                <div class="places-list">
+                  <% user.selectedPackage.places.forEach(place => { %>
+                    <span class="place-badge"><%= place.name %></span>
+                  <% }); %>
+                </div>
+              </div>
+            <% } %>
+          </div>
+        <% } else { %>
+          <p style="color: #999; text-align: center; padding: 20px;">No package selected</p>
+        <% } %>
+      </div>
+
+      <!-- Bus Details -->
+      <div class="section">
+        <div class="section-title">
+          <span>🚌</span> Bus & Seat Details
+        </div>
+        
+        <% if (user.selectedBus) { %>
+          <div class="bus-box">
+            <div class="bus-name"><%= user.selectedBus.busName %></div>
+            <div class="bus-number">Bus Number: <%= user.selectedBus.busNumber %></div>
+            <% if (user.seatNumber) { %>
+              <div style="margin-top: 15px;">
+                <span class="seat-badge">Seat #<%= user.seatNumber %></span>
+              </div>
+            <% } %>
+          </div>
+        <% } else { %>
+          <p style="color: #999; text-align: center; padding: 20px;">No bus selected yet</p>
+        <% } %>
+      </div>
+
+      <!-- Total Amount -->
+      <div class="total-section">
+        <div class="total-row">
+          <span>Package Amount:</span>
+          <span>₹<%= packagePrice.toLocaleString('en-IN') %></span>
+        </div>
+        <div class="grand-total">
+          <span>Total Amount:</span>
+          <span>₹<%= totalAmount.toLocaleString('en-IN') %></span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="receipt-footer">
+      <div class="receipt-date">Receipt Date: <%= receiptDate %></div>
+      <div class="thank-you">Thank You for Choosing Heritage Tour India!</div>
+      
+      <!-- Action Buttons -->
+      <div class="no-print">
+        <a href="/user/download-receipt" class="button download-button">
+          📥 Download PDF
+        </a>
+        <a href="/user/dashboard" class="button back-button">
+          ← Back to Dashboard
+        </a>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

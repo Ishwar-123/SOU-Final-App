@@ -1,0 +1,105 @@
+<nav class="bg-white/95 backdrop-blur-md shadow-2xl border-b-4 border-gradient fixed top-0 left-0 right-0 z-50">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex justify-between items-center h-24">
+      
+      <!-- Left Side: Logo + Brand -->
+      <a href="<%= user && user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard' %>" class="flex items-center space-x-4 group">
+        
+        <!-- Animated Logo Container -->
+        <div class="relative">
+          <!-- Glow Effect -->
+          <div class="absolute inset-0 bg-gradient-to-r from-orange-400 to-blue-500 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+          
+          <!-- Logo Image -->
+          <div class="relative bg-white p-3 rounded-2xl shadow-xl group-hover:shadow-2xl transform group-hover:scale-105 transition-all duration-300">
+            <img 
+              src="/images/logo.png" 
+              alt="Mission Unity Logo" 
+              class="h-14 w-auto object-contain"
+            >
+          </div>
+        </div>
+        
+        <!-- Brand Title -->
+        <div class="hidden md:block">
+          <h1 class="text-3xl font-black bg-gradient-to-r from-orange-600 via-blue-600 to-purple-600 bg-clip-text text-transparent group-hover:from-orange-500 group-hover:via-blue-500 group-hover:to-purple-500 transition-all duration-300">
+            Mission Unity
+          </h1>
+          <p class="text-sm text-gray-600 font-semibold tracking-wide">
+            🎓 Lessons in Leadership
+          </p>
+        </div>
+      </a>
+
+      <!-- Right Side: User Menu -->
+      <div class="flex items-center space-x-4">
+        <% if (user) { %>
+          <!-- User Info Card -->
+          <div class="flex items-center space-x-4 bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50 rounded-2xl px-6 py-3 shadow-lg hover:shadow-2xl transition-all duration-300 border border-orange-200/50">
+            
+            <!-- User Avatar -->
+            <div class="relative">
+              <div class="absolute inset-0 bg-gradient-to-br from-orange-500 to-blue-600 rounded-xl blur opacity-40"></div>
+              <div class="relative w-12 h-12 bg-gradient-to-br from-orange-500 via-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                <%= user.fullName.charAt(0).toUpperCase() %>
+              </div>
+            </div>
+            
+            <!-- User Details -->
+            <div class="hidden sm:block text-left">
+              <p class="text-sm font-bold text-gray-800"><%= user.fullName %></p>
+              <p class="text-xs font-semibold capitalize">
+                <% if (user.role === 'admin') { %>
+                  <span class="text-purple-600">👑 Admin</span>
+                <% } else { %>
+                  <span class="text-blue-600">🎓 Student</span>
+                <% } %>
+              </p>
+            </div>
+            
+            <!-- Logout Button -->
+            <a href="/auth/logout" class="px-5 py-2.5 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-xl text-sm font-bold hover:from-red-600 hover:to-pink-700 transition-all shadow-md hover:shadow-xl transform hover:scale-105 duration-300">
+              🚪 Logout
+            </a>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gradient Border Bottom -->
+  <div class="h-1 bg-gradient-to-r from-orange-500 via-blue-500 to-purple-600"></div>
+</nav>
+
+<style>
+  /* Custom Gradient Border */
+  .border-gradient {
+    border-image: linear-gradient(90deg, #f97316, #3b82f6, #9333ea) 1;
+  }
+
+  /* Smooth Animation */
+  @keyframes pulse-glow {
+    0%, 100% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+
+  /* Logo Glow Animation */
+  nav a:hover .absolute.inset-0 {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  /* Responsive Mobile View */
+  @media (max-width: 640px) {
+    nav .h-24 {
+      height: 5rem;
+    }
+    
+    nav img {
+      height: 2.5rem;
+    }
+  }
+</style>

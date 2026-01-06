@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Bus - HTI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+    }
+    
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+    }
+
+    .floating {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 24px;
+      max-width: 500px;
+      width: 100%;
+      animation: slideUp 0.3s ease;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { 
+        transform: translateY(50px) scale(0.95);
+        opacity: 0;
+      }
+      to { 
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    .shake {
+      animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <main class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 pt-24 sm:pt-28 pb-6 sm:pb-10">
+    
+    <!-- Header -->
+    <div class="mb-6 sm:mb-8">
+      <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl">
+        <div class="flex items-center gap-3 sm:gap-4">
+          <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl floating flex-shrink-0">
+            <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+            </svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h1 class="text-xl sm:text-3xl md:text-4xl font-black text-gray-800 mb-1">
+              🚌 Select Your Bus
+            </h1>
+            <p class="text-xs sm:text-sm text-gray-600 font-semibold">
+              Choose your bus for <strong><%= user.college ? user.college.name : 'your college' %></strong> (One-time selection)
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="mb-4 sm:mb-6">
+      <a href="/user/dashboard" class="inline-flex items-center gap-2 glass-card px-4 py-2.5 rounded-xl hover:shadow-lg transition-all text-sm sm:text-base font-bold text-gray-700">
+        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        <span>Back to Dashboard</span>
+      </a>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <% if (success) { %>
+      <div class="mb-4 sm:mb-6 glass-card p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-lg border-l-4 border-green-500">
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <p class="font-bold text-green-700 text-xs sm:text-base"><%= success %></p>
+        </div>
+      </div>
+    <% } %>
+
+    <% if (error) { %>
+      <div class="mb-4 sm:mb-6 glass-card p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-lg border-l-4 border-red-500">
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </div>
+          <p class="font-bold text-red-700 text-xs sm:text-base"><%= error %></p>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- College Info Card -->
+    <% if (user.college) { %>
+      <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-lg mb-4 sm:mb-6 border-2 border-indigo-200">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs text-gray-600 font-bold">Your College</p>
+            <p class="text-sm sm:text-base font-black text-gray-800"><%= user.college.name %></p>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Important Notice -->
+    <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl mb-6 sm:mb-8 border-2 border-yellow-300 bg-gradient-to-r from-yellow-50 to-orange-50">
+      <div class="flex items-start gap-3 sm:gap-4">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-base sm:text-lg font-black text-yellow-800 mb-2">⚠️ Important Notice</h3>
+          <ul class="text-xs sm:text-sm text-yellow-700 space-y-1 font-semibold list-disc list-inside">
+            <li>You can select a bus <strong>only once</strong></li>
+            <li>After selection, you <strong>cannot change</strong> it later</li>
+            <li>Only buses from <strong><%= user.college ? user.college.name : 'your college' %></strong> are shown</li>
+            <li>Please choose carefully based on availability</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bus Cards Grid -->
+    <% if (buses && buses.length > 0) { %>
+      <div class="mb-4 sm:mb-6">
+        <h2 class="text-lg sm:text-xl font-black text-white mb-3 flex items-center gap-2">
+          <span class="text-2xl">🚌</span>
+          <span>Available Buses (<%= buses.length %>)</span>
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <% buses.forEach((bus, index) => { %>
+          <div class="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl card-hover border-2 border-blue-200">
+            
+            <!-- Bus Header -->
+            <div class="mb-4 sm:mb-5">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                  <span class="text-2xl sm:text-3xl">🚌</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-lg sm:text-xl font-black text-blue-900 truncate"><%= bus.busName %></h3>
+                  <p class="text-xs sm:text-sm text-blue-600 font-bold"><%= bus.busNumber %></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seat Information -->
+            <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 mb-4 sm:mb-5 border-2 border-blue-200">
+              <div class="grid grid-cols-2 gap-4 text-center">
+                <div>
+                  <p class="text-gray-600 text-xs font-bold uppercase mb-1">Total Seats</p>
+                  <p class="text-2xl sm:text-3xl font-black text-gray-900"><%= bus.capacity %></p>
+                </div>
+                <div>
+                  <p class="text-gray-600 text-xs font-bold uppercase mb-1">Available</p>
+                  <p class="text-2xl sm:text-3xl font-black text-green-600"><%= bus.availableSeats %></p>
+                </div>
+              </div>
+
+              <!-- Availability Bar -->
+              <div class="mt-3">
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    class="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all duration-500" 
+                    style="width: <%= (bus.availableSeats / bus.capacity * 100) %>%"
+                  ></div>
+                </div>
+                <p class="text-xs text-gray-600 mt-1 text-center font-semibold">
+                  <%= Math.round(bus.availableSeats / bus.capacity * 100) %>% Available
+                </p>
+              </div>
+            </div>
+
+            <!-- Select Button -->
+            <form id="busForm<%= index %>" action="/user/select-bus" method="POST">
+              <input type="hidden" name="busId" value="<%= bus._id %>">
+              
+              <% if (bus.availableSeats > 0) { %>
+                <button 
+                  type="button"
+                  onclick="openConfirmModal('<%= bus.busName %>', '<%= bus.busNumber %>', <%= index %>)"
+                  class="w-full bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white py-3 sm:py-4 rounded-xl sm:rounded-2xl font-black text-sm sm:text-base hover:shadow-2xl transition-all transform active:scale-95 flex items-center justify-center gap-2"
+                >
+                  <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Select This Bus</span>
+                </button>
+              <% } else { %>
+                <button 
+                  disabled 
+                  class="w-full bg-gray-300 text-gray-500 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-black text-sm sm:text-base cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                  <span>Bus Full</span>
+                </button>
+              <% } %>
+            </form>
+
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      
+      <!-- No Buses Available -->
+      <div class="glass-card rounded-2xl sm:rounded-3xl shadow-2xl p-8 sm:p-12 text-center border-2 border-gray-200">
+        <div class="text-6xl sm:text-8xl mb-4">🚌</div>
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-black text-gray-800 mb-2 sm:mb-3">
+          No Buses Available
+        </h2>
+        <p class="text-sm sm:text-base text-gray-600 mb-2">
+          Sorry, there are currently no buses available for <strong><%= user.college ? user.college.name : 'your college' %></strong>.
+        </p>
+        <p class="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6 max-w-xl mx-auto">
+          Please check back later or contact support for assistance.
+        </p>
+        <a href="/user/dashboard" class="inline-block bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold py-3 sm:py-4 px-6 sm:px-10 rounded-xl sm:rounded-2xl hover:shadow-2xl active:scale-95 transition-all text-sm sm:text-base">
+          ← Back to Dashboard
+        </a>
+      </div>
+      
+    <% } %>
+
+    <!-- Help Section -->
+    <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl mt-6 sm:mt-8 border-2 border-purple-200">
+      <div class="flex items-start gap-3 sm:gap-4">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-base sm:text-lg font-black text-gray-800 mb-2">Need Help?</h3>
+          <p class="text-xs sm:text-sm text-gray-600 mb-3">
+            If you have any questions about bus selection or face any issues, please contact our support team.
+          </p>
+          <a href="mailto:support@missionunity.com" class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-2 px-4 rounded-xl hover:shadow-lg transition-all text-xs sm:text-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            <span>Contact Support</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ✅ Confirmation Modal -->
+  <div id="confirmModal" class="modal">
+    <div class="modal-content">
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-yellow-500 to-orange-500 p-6 text-white">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-2xl font-black">Are you absolutely sure?</h3>
+            <p class="text-sm text-yellow-100">This action cannot be undone</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6">
+        <div class="bg-gray-50 rounded-xl p-4 mb-4 border-2 border-gray-200">
+          <p class="text-sm text-gray-600 mb-2 font-semibold">You are about to select:</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <span class="text-xl">🚌</span>
+            </div>
+            <div>
+              <p id="modalBusName" class="text-lg font-black text-gray-800"></p>
+              <p id="modalBusNumber" class="text-sm text-gray-600 font-bold"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-6">
+          <p class="text-sm font-bold text-red-800 mb-2">⚠️ Important Warning:</p>
+          <ul class="text-xs text-red-700 space-y-1 list-disc list-inside">
+            <li>You can select a bus only <strong>ONCE</strong></li>
+            <li>After selection, you <strong>CANNOT CHANGE</strong> it later</li>
+            <li>Please make sure this is the correct bus</li>
+          </ul>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-2 gap-3">
+          <button
+            onclick="closeConfirmModal()"
+            class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-black py-3 px-6 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            <span>Cancel</span>
+          </button>
+          <button
+            onclick="confirmBusSelection()"
+            class="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white font-black py-3 px-6 rounded-xl transition-all active:scale-95 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span>OK</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+<%- include('../partials/footer') %>
+  <script>
+    let selectedFormIndex = null;
+
+    function openConfirmModal(busName, busNumber, formIndex) {
+      selectedFormIndex = formIndex;
+      document.getElementById('modalBusName').textContent = busName;
+      document.getElementById('modalBusNumber').textContent = busNumber;
+      document.getElementById('confirmModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirmModal').classList.remove('active');
+      document.body.style.overflow = 'auto';
+      selectedFormIndex = null;
+    }
+
+    function confirmBusSelection() {
+      if (selectedFormIndex !== null) {
+        document.getElementById('busForm' + selectedFormIndex).submit();
+      }
+    }
+
+    // Close modal on outside click
+    document.getElementById('confirmModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeConfirmModal();
+      }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeConfirmModal();
+      }
+    });
+  </script>
+</body>
+</html>

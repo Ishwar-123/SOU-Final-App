@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    /* ✅ Place Card - Default State (Gray Border) */
+    .place-card {
+      border: 4px solid #e5e7eb;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    /* Hover Effect - Red Border Preview */
+    .place-card:hover {
+      border-color: #fca5a5;
+      box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2);
+    }
+
+    /* ✅ Selected State - RED BORDER & GLOW */
+    .place-card.selected {
+      border: 4px solid #ef4444 !important;
+      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3), 0 10px 40px rgba(239, 68, 68, 0.5) !important;
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%) !important;
+      animation: pulse-border 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-border {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3), 0 10px 40px rgba(239, 68, 68, 0.5); }
+      50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.4), 0 15px 50px rgba(239, 68, 68, 0.6); }
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      animation: slideUp 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { 
+        opacity: 0;
+        transform: translateY(50px) scale(0.9);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <main class="max-w-7xl mx-auto px-3 sm:px-4 pt-24 sm:pt-28 pb-6 sm:pb-10">
+    
+    <!-- Header -->
+    <div class="text-center mb-4 sm:mb-6 text-white">
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-black mb-1 sm:mb-2 drop-shadow-lg">📍 Add Extra Places</h1>
+      <p class="text-sm sm:text-lg opacity-90">Select additional heritage sites outside your package</p>
+    </div>
+
+    <!-- ✅ CHECK IF ALREADY SELECTED -->
+    <% if (user.hasSelectedExtraPlaces) { %>
+      
+      <!-- 🔒 LOCKED STATE -->
+      <div class="max-w-4xl mx-auto mb-6">
+        <div class="bg-gradient-to-r from-red-500 to-pink-600 text-white p-6 sm:p-8 rounded-3xl shadow-2xl border-4 border-red-300">
+          <div class="flex items-start gap-4">
+            <div class="w-14 h-14 sm:w-16 sm:h-16 bg-white rounded-2xl flex items-center justify-center flex-shrink-0">
+              <span class="text-3xl sm:text-4xl">🔒</span>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-xl sm:text-2xl font-black mb-2">Selection Locked!</h3>
+              <p class="text-base sm:text-lg font-semibold mb-3">
+                You have already selected extra places. This selection is <strong>permanent</strong> and cannot be changed.
+              </p>
+              <div class="bg-white/20 backdrop-blur rounded-xl p-3 sm:p-4">
+                <p class="font-bold text-sm">
+                  ✓ Total Extra Places: <strong><%= user.extraPlaces.length %></strong>
+                </p>
+                <p class="text-xs sm:text-sm mt-1">
+                  Selected on: <%= new Date(user.extraPlacesSelectedAt).toLocaleDateString('en-IN') %>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Show Selected Extra Places -->
+      <% if (user.extraPlaces && user.extraPlaces.length > 0) { %>
+        <div class="bg-white rounded-3xl shadow-2xl p-6 mb-6">
+          <h2 class="text-2xl font-black text-gray-800 mb-4">Your Selected Extra Places</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <% user.extraPlaces.forEach((place, index) => { %>
+              <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border-2 border-purple-300">
+                <div class="flex items-start gap-2 mb-2">
+                  <span class="bg-purple-600 text-white w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0">
+                    <%= index + 1 %>
+                  </span>
+                  <div class="flex-1 min-w-0">
+                    <p class="font-bold text-purple-800 text-sm truncate"><%= place.name %></p>
+                    <p class="text-xs text-gray-600 truncate">📍 <%= place.location %></p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="text-lg font-bold text-purple-600">₹<%= place.price.toLocaleString('en-IN') %></p>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      <% } %>
+
+      <div class="text-center">
+        <a href="/user/dashboard" class="inline-block bg-white text-purple-600 font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-2xl shadow-xl hover:shadow-2xl active:scale-95 transition-all text-sm sm:text-base">
+          ← Back to Dashboard
+        </a>
+      </div>
+
+    <% } else { %>
+
+      <!-- ⚠️ RED WARNING BANNER (IF NOT SELECTED YET) -->
+      <div class="max-w-5xl mx-auto mb-6">
+        <div class="bg-white p-4 sm:p-6 rounded-3xl shadow-2xl border-4 border-red-500">
+          <div class="flex items-start gap-3 sm:gap-4">
+            <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl flex items-center justify-center flex-shrink-0">
+              <span class="text-2xl sm:text-3xl">⚠️</span>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg sm:text-2xl font-black text-gray-800 mb-2">⚠️ Important Notice!</h3>
+              
+              <!-- ✅ RED HIGHLIGHTED LINE -->
+              <div class="bg-gradient-to-r from-red-500 to-red-600 text-white p-3 sm:p-4 rounded-xl mb-3 shadow-lg animate-pulse">
+                <p class="text-sm sm:text-lg font-black text-center">
+                  🚨 You can select extra places <strong>ONLY ONCE</strong> 🚨
+                </p>
+              </div>
+              
+              <div class="bg-yellow-50 border-2 border-yellow-300 p-3 rounded-xl">
+                <p class="text-xs sm:text-sm text-gray-700 font-semibold text-center">
+                  After confirmation, this selection is <strong class="text-red-600">PERMANENT</strong> and cannot be changed. Choose carefully!
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success/Error Messages -->
+      <% if (success) { %>
+        <div class="mb-4 bg-green-500 text-white p-3 sm:p-4 rounded-xl shadow-lg">
+          <p class="font-bold text-center text-sm sm:text-base"><%= success %></p>
+        </div>
+      <% } %>
+
+      <% if (error) { %>
+        <div class="mb-4 bg-red-500 text-white p-3 sm:p-4 rounded-xl shadow-lg">
+          <p class="font-bold text-center text-sm sm:text-base"><%= error %></p>
+        </div>
+      <% } %>
+
+      <!-- Main Package Info -->
+      <div class="bg-white rounded-2xl shadow-2xl p-4 sm:p-6 mb-4 sm:mb-6 border-4 border-green-500">
+        <h2 class="text-lg sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">✅ Your Selected Package</h2>
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+          <div class="flex-1 min-w-0">
+            <p class="text-xl sm:text-2xl font-bold text-gray-800 truncate"><%= user.selectedPackage.name %></p>
+            <p class="text-sm sm:text-base text-gray-600">Includes <%= user.selectedPackage.places.length %> heritage sites</p>
+          </div>
+          <div class="text-right">
+            <p class="text-2xl sm:text-4xl font-bold text-green-600">₹<%= user.selectedPackage.price.toLocaleString('en-IN') %></p>
+            <p class="text-xs sm:text-sm text-gray-600">Package Price</p>
+          </div>
+        </div>
+
+        <!-- Package Places -->
+        <div class="mt-3 sm:mt-4 border-t pt-3 sm:pt-4">
+          <p class="text-xs sm:text-sm font-semibold text-gray-700 mb-2">Places in your package:</p>
+          <div class="flex flex-wrap gap-1 sm:gap-2">
+            <% user.selectedPackage.places.forEach(place => { %>
+              <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-[10px] sm:text-xs font-semibold">
+                ✓ <%= place.name %>
+              </span>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Extra Places Form -->
+      <form action="/user/select-extra-places" method="POST" id="extraPlacesForm" onsubmit="return openConfirmModal(event)">
+        
+        <!-- Live Price Display -->
+        <div class="bg-white rounded-2xl shadow-2xl p-4 sm:p-6 mb-4 sm:mb-6 border-4 border-purple-300">
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-xs sm:text-sm text-gray-600 mb-1">Extra Places Selected:</p>
+              <p class="text-2xl sm:text-3xl font-bold text-purple-600" id="selectedCount">0</p>
+            </div>
+            <div class="text-right">
+              <p class="text-xs sm:text-sm text-gray-600 mb-1">Extra Cost:</p>
+              <p class="text-2xl sm:text-4xl font-bold text-purple-600" id="totalPrice">₹0</p>
+            </div>
+          </div>
+          <div class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-purple-200">
+            <div class="flex justify-between items-center">
+              <p class="text-sm sm:text-base text-gray-700 font-bold">Grand Total:</p>
+              <p class="text-3xl sm:text-5xl font-bold text-green-600" id="grandTotal">₹<%= user.selectedPackage.price.toLocaleString('en-IN') %></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Available Extra Places Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <% if (availablePlaces.length === 0) { %>
+            <div class="col-span-full bg-white rounded-2xl shadow-2xl p-8 sm:p-12 text-center">
+              <p class="text-xl sm:text-2xl text-gray-500 mb-3 sm:mb-4">📍 No additional places available</p>
+              <p class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">All available places are already in your package</p>
+              <a href="/user/dashboard" class="inline-block bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 sm:px-8 py-3 rounded-xl font-bold hover:shadow-lg active:scale-95 transition text-sm sm:text-base">
+                Go to Dashboard
+              </a>
+            </div>
+          <% } else { %>
+            <% availablePlaces.forEach(place => { %>
+              <label class="cursor-pointer group">
+                <input 
+                  type="checkbox" 
+                  name="extraPlaceIds" 
+                  value="<%= place._id %>"
+                  data-price="<%= place.price %>"
+                  data-name="<%= place.name %>"
+                  class="hidden peer place-checkbox"
+                  onchange="updateTotal()"
+                >
+                <!-- ✅ RED Border Card on Select -->
+                <div class="place-card bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden transition-all hover:scale-105 h-full">
+                  <div class="p-4 sm:p-6 flex flex-col h-full">
+                    <div class="flex justify-between items-start mb-3 sm:mb-4">
+                      <div class="flex-1 min-w-0 pr-2">
+                        <h3 class="text-base sm:text-xl font-bold text-gray-800 mb-1 sm:mb-2 truncate"><%= place.name %></h3>
+                        <p class="text-xs sm:text-sm text-gray-600 truncate">📍 <%= place.location %></p>
+                      </div>
+                      <!-- Checkmark Circle -->
+                      <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-4 flex items-center justify-center flex-shrink-0 transition-all border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600">
+                        <svg class="w-4 h-4 text-white hidden peer-checked:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                      </div>
+                    </div>
+                    
+                    <div class="mt-auto">
+                      <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-3 sm:p-4 border-2 border-purple-100">
+                        <p class="text-2xl sm:text-3xl font-bold text-purple-600">₹<%= place.price.toLocaleString('en-IN') %></p>
+                        <p class="text-[10px] sm:text-xs text-gray-600 font-semibold">Entry Fee</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </label>
+            <% }); %>
+          <% } %>
+        </div>
+
+        <!-- Action Buttons -->
+        <% if (availablePlaces.length > 0) { %>
+          <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <a href="/user/dashboard" class="bg-gray-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold hover:bg-gray-600 active:scale-95 transition text-sm sm:text-base text-center">
+              Skip Extra Places
+            </a>
+            <button type="submit" class="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold hover:shadow-2xl active:scale-95 transition text-sm sm:text-base">
+              Confirm Selection (Final & Permanent)
+            </button>
+          </div>
+        <% } %>
+      </form>
+
+    <% } %>
+
+  </main>
+
+  <!-- ✅ CONFIRMATION MODAL -->
+  <div id="confirmModal" class="modal">
+    <div class="modal-content w-11/12 max-w-md mx-auto">
+      <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <!-- Modal Header -->
+        <div class="bg-gradient-to-r from-red-500 to-red-600 p-6 text-white text-center">
+          <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <span class="text-4xl">⚠️</span>
+          </div>
+          <h3 class="text-2xl font-black">Final Confirmation</h3>
+          <p class="text-sm mt-1 opacity-90">⚠️ ONE-TIME SELECTION</p>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6">
+          <div class="bg-purple-50 border-2 border-purple-300 rounded-xl p-4 mb-4">
+            <p class="text-center font-bold text-gray-800 mb-2" id="modalMessage">
+              You have selected <span id="modalCount" class="text-purple-600">0</span> extra place(s).
+            </p>
+            <p class="text-sm text-center text-gray-600">
+              Total Extra Cost: <span id="modalPrice" class="font-bold text-purple-600">₹0</span>
+            </p>
+          </div>
+
+          <div class="bg-red-50 border-2 border-red-400 rounded-xl p-4 mb-6">
+            <p class="text-sm text-center text-red-700 font-black">
+              🚨 This selection is <strong>PERMANENT</strong> and cannot be changed!
+            </p>
+          </div>
+
+          <!-- Modal Buttons -->
+          <div class="flex flex-col gap-3">
+            <button onclick="confirmAndSubmit()" class="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-3 px-6 rounded-xl hover:shadow-xl active:scale-95 transition">
+              ✓ Yes, Confirm Selection
+            </button>
+            <button onclick="closeModal()" class="bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-xl hover:bg-gray-400 active:scale-95 transition">
+              ← Go Back & Review
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const packagePrice = <%= user.selectedPackage.price %>;
+
+    function updateTotal() {
+      const checkboxes = document.querySelectorAll('.place-checkbox');
+      let extraTotal = 0;
+      let count = 0;
+
+      checkboxes.forEach(checkbox => {
+        const card = checkbox.nextElementSibling; // Get the card div
+        
+        if (checkbox.checked) {
+          // ✅ Add RED border when selected
+          card.classList.add('selected');
+          const price = parseFloat(checkbox.dataset.price) || 0;
+          extraTotal += price;
+          count++;
+        } else {
+          // ✅ Remove RED border when deselected
+          card.classList.remove('selected');
+        }
+      });
+
+      const grandTotal = packagePrice + extraTotal;
+
+      document.getElementById('selectedCount').textContent = count;
+      document.getElementById('totalPrice').textContent = '₹' + extraTotal.toLocaleString('en-IN');
+      document.getElementById('grandTotal').textContent = '₹' + grandTotal.toLocaleString('en-IN');
+    }
+
+    function openConfirmModal(event) {
+      event.preventDefault();
+      
+      const checkedCount = document.querySelectorAll('.place-checkbox:checked').length;
+      const extraTotal = Array.from(document.querySelectorAll('.place-checkbox:checked'))
+        .reduce((sum, cb) => sum + parseFloat(cb.dataset.price || 0), 0);
+
+      document.getElementById('modalCount').textContent = checkedCount;
+      document.getElementById('modalPrice').textContent = '₹' + extraTotal.toLocaleString('en-IN');
+
+      if (checkedCount === 0) {
+        document.getElementById('modalMessage').innerHTML = 
+          'You have <strong class="text-red-600">NOT selected any</strong> extra places.<br><span class="text-sm">Are you sure you want to skip?</span>';
+      } else {
+        document.getElementById('modalMessage').innerHTML = 
+          'You have selected <span class="text-purple-600 font-black">' + checkedCount + '</span> extra place(s).';
+      }
+
+      document.getElementById('confirmModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('confirmModal').classList.remove('active');
+    }
+
+    function confirmAndSubmit() {
+      document.getElementById('extraPlacesForm').submit();
+    }
+
+    // Close modal on outside click
+    document.getElementById('confirmModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeModal();
+      }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', updateTotal);
+  </script>
+</body>
+</html>

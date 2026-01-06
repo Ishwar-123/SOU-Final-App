@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+  <%- include('../partials/navbar') %>
+
+  <div class="max-w-7xl mx-auto px-4 py-8 pt-24">
+    
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-4xl font-bold text-gray-800">📦 Optional Packages Management</h1>
+        <p class="text-gray-600 mt-2">Add and manage optional tour packages</p>
+      </div>
+      <button onclick="openCreateModal()" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition">
+        ➕ Add Optional Package
+      </button>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <% if (success) { %>
+      <div class="mb-6 bg-green-500 text-white p-4 rounded-xl shadow-lg flex items-center gap-3 animate-pulse">
+        <span class="text-2xl">✅</span>
+        <p class="font-semibold"><%= success %></p>
+      </div>
+    <% } %>
+
+    <% if (error) { %>
+      <div class="mb-6 bg-red-500 text-white p-4 rounded-xl shadow-lg flex items-center gap-3">
+        <span class="text-2xl">❌</span>
+        <p class="font-semibold"><%= error %></p>
+      </div>
+    <% } %>
+
+    <!-- Optional Packages Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% if (optionalPackages.length === 0) { %>
+        <div class="col-span-full bg-white rounded-2xl shadow-xl p-12 text-center">
+          <div class="text-6xl mb-4">📦</div>
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">No Optional Packages Yet</h3>
+          <p class="text-gray-600 mb-6">Create your first optional package to get started</p>
+          <button onclick="openCreateModal()" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-xl font-bold hover:shadow-lg transition">
+            ➕ Add First Package
+          </button>
+        </div>
+      <% } else { %>
+        <% optionalPackages.forEach(pkg => { %>
+          <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-purple-200 hover:shadow-2xl transition">
+            <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-4 text-white">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-xl font-bold mb-1"><%= pkg.name %></h3>
+                  <p class="text-purple-100 text-xs">Optional Package</p>
+                </div>
+                <span class="bg-white text-purple-600 px-3 py-1 rounded-full text-xs font-bold">
+                  OPTIONAL
+                </span>
+              </div>
+            </div>
+
+            <div class="p-6">
+              <p class="text-gray-600 text-sm mb-4 line-clamp-2"><%= pkg.description %></p>
+
+              <div class="space-y-3 mb-4">
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-600 text-sm">🏫 College:</span>
+                  <span class="font-semibold text-gray-800 text-sm"><%= pkg.college.name %></span>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-600 text-sm">⏱️ Duration:</span>
+                  <span class="font-semibold text-gray-800"><%= pkg.duration %> Days</span>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-600 text-sm">💰 Price:</span>
+                  <span class="font-bold text-purple-600 text-lg">₹<%= pkg.price.toLocaleString('en-IN') %></span>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-600 text-sm">📍 Places:</span>
+                  <span class="font-semibold text-gray-800"><%= pkg.places.length %> locations</span>
+                </div>
+              </div>
+
+              <!-- Places List -->
+              <% if (pkg.places && pkg.places.length > 0) { %>
+                <div class="border-t pt-4 mb-4">
+                  <p class="text-xs font-semibold text-gray-700 mb-2">Included Places:</p>
+                  <div class="space-y-1">
+                    <% pkg.places.slice(0, 3).forEach(place => { %>
+                      <p class="text-xs text-gray-600">• <%= place.name %></p>
+                    <% }); %>
+                    <% if (pkg.places.length > 3) { %>
+                      <p class="text-xs text-purple-600 font-semibold">+ <%= pkg.places.length - 3 %> more</p>
+                    <% } %>
+                  </div>
+                </div>
+              <% } %>
+
+              <!-- Action Buttons -->
+              <div class="flex gap-2">
+                <button 
+                  onclick='openEditModal(<%= JSON.stringify({
+                    _id: pkg._id,
+                    name: pkg.name,
+                    description: pkg.description,
+                    price: pkg.price,
+                    duration: pkg.duration,
+                    college: { _id: pkg.college._id },
+                    places: pkg.places.map(p => ({ _id: p._id }))
+                  }) %>)' 
+                  class="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition text-sm font-semibold"
+                >
+                  ✏️ Edit
+                </button>
+                <button 
+                  onclick="deletePackage('<%= pkg._id %>', '<%= pkg.name %>')" 
+                  class="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition text-sm font-semibold"
+                >
+                  🗑️ Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Create Modal -->
+  <div id="createModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-6 text-white">
+        <h2 class="text-2xl font-bold">➕ Add Optional Package</h2>
+      </div>
+
+      <form action="/admin/optional-packages/create" method="POST" class="p-6 space-y-4">
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">Package Name *</label>
+          <input type="text" name="name" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-purple-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">Description *</label>
+          <textarea name="description" required rows="3" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-purple-500 focus:outline-none"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Price (₹) *</label>
+            <input type="number" name="price" required min="0" step="0.01" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-purple-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Duration (Days) *</label>
+            <input type="number" name="duration" required min="1" max="30" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-purple-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">College *</label>
+          <select name="college" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-purple-500 focus:outline-none">
+            <option value="">Select College</option>
+            <% colleges.forEach(college => { %>
+              <option value="<%= college._id %>"><%= college.name %></option>
+            <% }); %>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">Select Places *</label>
+          <div class="border-2 border-gray-300 rounded-xl p-4 max-h-48 overflow-y-auto">
+            <% places.forEach(place => { %>
+              <label class="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                <input type="checkbox" name="places" value="<%= place._id %>" class="w-4 h-4">
+                <span class="text-gray-800 text-sm"><%= place.name %> - ₹<%= place.price.toLocaleString('en-IN') %></span>
+              </label>
+            <% }); %>
+          </div>
+        </div>
+
+        <div class="flex gap-3 pt-4">
+          <button type="button" onclick="closeCreateModal()" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-400 transition">
+            Cancel
+          </button>
+          <button type="submit" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-bold hover:shadow-lg transition">
+            Create Package
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
+        <h2 class="text-2xl font-bold">✏️ Edit Optional Package</h2>
+      </div>
+
+      <form action="/admin/optional-packages/update" method="POST" class="p-6 space-y-4">
+        <input type="hidden" id="edit_id" name="id">
+
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">Package Name *</label>
+          <input type="text" id="edit_name" name="name" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">Description *</label>
+          <textarea id="edit_description" name="description" required rows="3" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Price (₹) *</label>
+            <input type="number" id="edit_price" name="price" required min="0" step="0.01" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Duration (Days) *</label>
+            <input type="number" id="edit_duration" name="duration" required min="1" max="30" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">College *</label>
+          <select id="edit_college" name="college" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none">
+            <option value="">Select College</option>
+            <% colleges.forEach(college => { %>
+              <option value="<%= college._id %>"><%= college.name %></option>
+            <% }); %>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">Select Places *</label>
+          <div id="edit_places_container" class="border-2 border-gray-300 rounded-xl p-4 max-h-48 overflow-y-auto">
+            <% places.forEach(place => { %>
+              <label class="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                <input type="checkbox" name="places" value="<%= place._id %>" class="w-4 h-4 edit-place-checkbox">
+                <span class="text-gray-800 text-sm"><%= place.name %> - ₹<%= place.price.toLocaleString('en-IN') %></span>
+              </label>
+            <% }); %>
+          </div>
+        </div>
+
+        <div class="flex gap-3 pt-4">
+          <button type="button" onclick="closeEditModal()" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-400 transition">
+            Cancel
+          </button>
+          <button type="submit" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl font-bold hover:shadow-lg transition">
+            Update Package
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openCreateModal() {
+      document.getElementById('createModal').classList.remove('hidden');
+    }
+
+    function closeCreateModal() {
+      document.getElementById('createModal').classList.add('hidden');
+    }
+
+    function openEditModal(pkg) {
+      document.getElementById('edit_id').value = pkg._id;
+      document.getElementById('edit_name').value = pkg.name;
+      document.getElementById('edit_description').value = pkg.description;
+      document.getElementById('edit_price').value = pkg.price;
+      document.getElementById('edit_duration').value = pkg.duration;
+      document.getElementById('edit_college').value = pkg.college._id;
+
+      // Check selected places
+      document.querySelectorAll('.edit-place-checkbox').forEach(checkbox => {
+        checkbox.checked = pkg.places.some(place => place._id.toString() === checkbox.value);
+      });
+
+      document.getElementById('editModal').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.add('hidden');
+    }
+
+    function deletePackage(packageId, packageName) {
+      if (confirm(`Are you sure you want to delete "${packageName}"?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/optional-packages/delete';
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'id';
+        input.value = packageId;
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+      }
+    }
+
+    // Close modals on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeCreateModal();
+        closeEditModal();
+      }
+    });
+  </script>
+</body>
+</html>
