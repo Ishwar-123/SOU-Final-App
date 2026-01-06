@@ -3,37 +3,9 @@ const Package = require('../models/Package');
 const College = require('../models/College');
 const Bus = require('../models/Bus');
 const Place = require('../models/Place');
-// const htmlPdf = require('html-pdf-node');
-const puppeteer = require('puppeteer');
+const htmlPdf = require('html-pdf-node');
 const ejs = require('ejs');
 const path = require('path');
-
-
-// Helper function to get Chrome executable path
-async function getChromePath() {
-  // Check if running on Vercel/serverless (production)
-  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
-    return await chromium.executablePath(
-      'https://github.com/Sparticuz/chromium/releases/download/v131.0.0/chromium-v131.0.0-pack.tar'
-    );
-  }
-  
-  // Local development - use system Chrome/Chromium
-  const os = require('os');
-  const platform = os.platform();
-  
-  if (platform === 'win32') {
-    // Windows paths
-    return 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' ||
-           'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe';
-  } else if (platform === 'darwin') {
-    // macOS path
-    return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-  } else {
-    // Linux paths
-    return '/usr/bin/google-chrome' || '/usr/bin/chromium-browser';
-  }
-}
 
 
 // ==================== USER DASHBOARD ====================
@@ -123,7 +95,7 @@ exports.selectPackage = async (req, res) => {
     if (!user || !user.college) {
       return res.redirect(
         '/user/select-package?error=' +
-        encodeURIComponent('College not assigned. Please contact admin.')
+          encodeURIComponent('College not assigned. Please contact admin.')
       );
     }
 
@@ -136,7 +108,7 @@ exports.selectPackage = async (req, res) => {
     if (!pkg) {
       return res.redirect(
         '/user/select-package?error=' +
-        encodeURIComponent('Invalid package selected for your college')
+          encodeURIComponent('Invalid package selected for your college')
       );
     }
 
@@ -144,7 +116,7 @@ exports.selectPackage = async (req, res) => {
     if (user.selectedPackage) {
       return res.redirect(
         '/user/select-package?error=' +
-        encodeURIComponent('You have already selected a package')
+          encodeURIComponent('You have already selected a package')
       );
     }
 
@@ -154,13 +126,13 @@ exports.selectPackage = async (req, res) => {
 
     res.redirect(
       '/user/select-package?success=' +
-      encodeURIComponent('Package selected successfully! ✓')
+        encodeURIComponent('Package selected successfully! ✓')
     );
   } catch (error) {
     console.error('Select package error:', error);
     res.redirect(
       '/user/select-package?error=' +
-      encodeURIComponent('Failed to select package')
+        encodeURIComponent('Failed to select package')
     );
   }
 };
@@ -189,7 +161,7 @@ exports.selectBus = async (req, res) => {
       console.log('========================================\n');
       return res.redirect(
         '/user/select-bus?error=' +
-        encodeURIComponent('Please select a bus')
+          encodeURIComponent('Please select a bus')
       );
     }
 
@@ -211,7 +183,7 @@ exports.selectBus = async (req, res) => {
       console.log('========================================\n');
       return res.redirect(
         '/user/dashboard?error=' +
-        encodeURIComponent('College not assigned')
+          encodeURIComponent('College not assigned')
       );
     }
 
@@ -220,7 +192,7 @@ exports.selectBus = async (req, res) => {
       console.log('========================================\n');
       return res.redirect(
         '/user/dashboard?error=' +
-        encodeURIComponent('Please select a package first')
+          encodeURIComponent('Please select a package first')
       );
     }
 
@@ -229,7 +201,7 @@ exports.selectBus = async (req, res) => {
       console.log('========================================\n');
       return res.redirect(
         '/user/dashboard?error=' +
-        encodeURIComponent('You have already selected a bus')
+          encodeURIComponent('You have already selected a bus')
       );
     }
 
@@ -240,7 +212,7 @@ exports.selectBus = async (req, res) => {
       console.log('========================================\n');
       return res.redirect(
         '/user/select-bus?error=' +
-        encodeURIComponent('Selected bus not found')
+          encodeURIComponent('Selected bus not found')
       );
     }
 
@@ -257,7 +229,7 @@ exports.selectBus = async (req, res) => {
       console.log('========================================\n');
       return res.redirect(
         '/user/select-bus?error=' +
-        encodeURIComponent('You can only select buses from your college')
+          encodeURIComponent('You can only select buses from your college')
       );
     }
 
@@ -266,7 +238,7 @@ exports.selectBus = async (req, res) => {
       console.log('========================================\n');
       return res.redirect(
         '/user/select-bus?error=' +
-        encodeURIComponent('Selected bus is not available')
+          encodeURIComponent('Selected bus is not available')
       );
     }
 
@@ -275,7 +247,7 @@ exports.selectBus = async (req, res) => {
       console.log('========================================\n');
       return res.redirect(
         '/user/select-bus?error=' +
-        encodeURIComponent('No seats available in this bus')
+          encodeURIComponent('No seats available in this bus')
       );
     }
 
@@ -303,7 +275,7 @@ exports.selectBus = async (req, res) => {
 
     res.redirect(
       '/user/dashboard?success=' +
-      encodeURIComponent('Bus selected successfully! ✓')
+        encodeURIComponent('Bus selected successfully! ✓')
     );
   } catch (error) {
     console.error('========================================');
@@ -315,7 +287,7 @@ exports.selectBus = async (req, res) => {
 
     res.redirect(
       '/user/select-bus?error=' +
-      encodeURIComponent('Bus selection failed. Please try again.')
+        encodeURIComponent('Bus selection failed. Please try again.')
     );
   }
 };
@@ -360,7 +332,7 @@ exports.getSelectBus = async (req, res) => {
       console.log('========================================\n');
       return res.redirect(
         '/user/dashboard?error=' +
-        encodeURIComponent('College not assigned. Please contact admin.')
+          encodeURIComponent('College not assigned. Please contact admin.')
       );
     }
 
@@ -369,7 +341,7 @@ exports.getSelectBus = async (req, res) => {
       console.log('========================================\n');
       return res.redirect(
         '/user/dashboard?error=' +
-        encodeURIComponent('Please select a package first')
+          encodeURIComponent('Please select a package first')
       );
     }
 
@@ -378,7 +350,7 @@ exports.getSelectBus = async (req, res) => {
       console.log('========================================\n');
       return res.redirect(
         '/user/dashboard?error=' +
-        encodeURIComponent('You have already selected a bus')
+          encodeURIComponent('You have already selected a bus')
       );
     }
 
@@ -409,7 +381,7 @@ exports.getSelectBus = async (req, res) => {
 
     res.redirect(
       '/user/dashboard?error=' +
-      encodeURIComponent('Unable to load bus selection page')
+        encodeURIComponent('Unable to load bus selection page')
     );
   }
 };
@@ -486,9 +458,9 @@ exports.viewReceipt = async (req, res) => {
     const packagePrice = user.selectedPackage ? user.selectedPackage.price : 0;
     const extraPlacesTotal = user.extraPlaces
       ? user.extraPlaces.reduce(
-        (sum, place) => sum + (place.price || 0),
-        0
-      )
+          (sum, place) => sum + (place.price || 0),
+          0
+        )
       : 0;
     const totalAmount = packagePrice + extraPlacesTotal;
 
@@ -508,17 +480,14 @@ exports.viewReceipt = async (req, res) => {
     console.error('Receipt view error:', error);
     res.redirect(
       '/user/dashboard?error=' +
-      encodeURIComponent('Unable to view receipt')
+        encodeURIComponent('Unable to view receipt')
     );
   }
 };
 
 
-
 // ==================== DOWNLOAD RECEIPT AS PDF ====================
 exports.downloadReceipt = async (req, res) => {
-  let browser = null;
-
   try {
     console.log('\n========================================');
     console.log('📥 DOWNLOAD RECEIPT REQUEST');
@@ -564,7 +533,6 @@ exports.downloadReceipt = async (req, res) => {
 
     console.log('💰 Total Amount:', totalAmount);
 
-    // 1) Render EJS -> HTML
     const html = await ejs.renderFile(
       path.join(__dirname, '../views/user/receipt-pdf.ejs'),
       {
@@ -578,22 +546,7 @@ exports.downloadReceipt = async (req, res) => {
 
     console.log('✅ HTML rendered successfully');
 
-    // 2) Launch puppeteer (bundled Chromium)
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
-
-    const page = await browser.newPage();
-
-    // 3) Set content
-    await page.setContent(html, {
-      waitUntil: ['networkidle0', 'domcontentloaded'],
-      timeout: 30000
-    });
-
-    // 4) Generate PDF buffer
-    const pdfBuffer = await page.pdf({
+    const options = {
       format: 'A4',
       printBackground: true,
       margin: {
@@ -601,48 +554,43 @@ exports.downloadReceipt = async (req, res) => {
         right: '10mm',
         bottom: '10mm',
         left: '10mm'
-      },
-      preferCSSPageSize: true
-    });
+      }
+    };
 
-    await browser.close();
-    browser = null;
+    const file = { content: html };
+
+    console.log('📄 Generating PDF...');
+
+    const pdfBuffer = await htmlPdf.generatePdf(file, options);
+
+    console.log('✅ PDF generated successfully');
 
     const filename = `HTI_Receipt_${user.fullName.replace(
       /\s+/g,
       '_'
     )}_${Date.now()}.pdf`;
 
-    // 5) Send PDF correctly
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
       'Content-Disposition',
       `attachment; filename="${filename}"`
     );
-    // Content-Length optional; agar doubt ho to hata bhi sakte ho
-    // res.setHeader('Content-Length', pdfBuffer.length);
+    res.setHeader('Content-Length', pdfBuffer.length);
 
-    return res.end(pdfBuffer);
+    console.log('📥 Sending PDF:', filename);
+    console.log('========================================\n');
 
+    res.send(pdfBuffer);
   } catch (error) {
     console.error('❌ PDF Download error:', error);
     console.error('Error stack:', error.stack);
     console.log('========================================\n');
-
-    if (browser) {
-      try {
-        await browser.close();
-      } catch (_) {}
-    }
-
-    return res.redirect(
+    res.redirect(
       '/user/dashboard?error=' +
         encodeURIComponent('Unable to download receipt. Please try again.')
     );
   }
 };
-
-
 // SELECT PACKAGE PAGE (renders this EJS)
 exports.getSelectPackagePage = async (req, res) => {
   try {
